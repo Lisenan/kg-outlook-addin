@@ -12,12 +12,12 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="KG Quick Reply &amp; Postings"/>
   <Description DefaultValue="Quick reply templates and load postings manager for Kingsgate Logistics"/>
-  <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
-  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png"/>
+  <IconUrl DefaultValue="https://lisenan.github.io/kg-outlook-addin/assets/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://lisenan.github.io/kg-outlook-addin/assets/icon-128.png"/>
   <SupportUrl DefaultValue="https://kingsgatelogistics.com"/>
 
   <AppDomains>
-    <AppDomain>https://localhost:3000</AppDomain>
+    <AppDomain>https://lisenan.github.io</AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -33,7 +33,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+        <SourceLocation DefaultValue="https://lisenan.github.io/kg-outlook-addin/taskpane.html"/>
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -87,13 +87,13 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="icon16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>
-        <bt:Image id="icon32" DefaultValue="https://localhost:3000/assets/icon-32.png"/>
-        <bt:Image id="icon80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
+        <bt:Image id="icon16" DefaultValue="https://lisenan.github.io/kg-outlook-addin/assets/icon-16.png"/>
+        <bt:Image id="icon32" DefaultValue="https://lisenan.github.io/kg-outlook-addin/assets/icon-32.png"/>
+        <bt:Image id="icon80" DefaultValue="https://lisenan.github.io/kg-outlook-addin/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="functionFile" DefaultValue="https://localhost:3000/taskpane.html"/>
-        <bt:Url id="taskPaneUrl" DefaultValue="https://localhost:3000/taskpane.html"/>
+        <bt:Url id="functionFile" DefaultValue="https://lisenan.github.io/kg-outlook-addin/taskpane.html"/>
+        <bt:Url id="taskPaneUrl" DefaultValue="https://lisenan.github.io/kg-outlook-addin/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="groupLabel" DefaultValue="KG Tools"/>
