@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KG Quick Reply & Postings</title>
+
+  <!-- Office.js -->
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --kg-navy: #1a2332;
+      --kg-dark: #222d3a;
+      --kg-slate: #2c3a4a;
+      --kg-blue: #3b82f6;
+      --kg-blue-hover: #2563eb;
+      --kg-green: #10b981;
+      --kg-green-hover: #059669;
+      --kg-red: #ef4444;
+      --kg-red-hover: #dc2626;
+      --kg-orange: #f59e0b;
+      --kg-orange-hover: #d97706;
+      --kg-purple: #8b5cf6;
+      --kg-purple-hover: #7c3aed;
+      --kg-teal: #14b8a6;
+      --kg-surface: #f1f5f9;
+      --kg-surface-alt: #e2e8f0;
+      --kg-text: #1e293b;
+      --kg-text-muted: #64748b;
+      --kg-border: #cbd5e1;
+      --kg-white: #ffffff;
+      --radius: 8px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --transition: 150ms ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--kg-surface);
+      color: var(--kg-text);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, var(--kg-navy), var(--kg-slate));
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-logo {
+      width: 32px; height: 32px;
+      background: var(--kg-blue);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: white; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .header-text h1 {
+      color: white; font-size: 14px; font-weight: 700; letter-spacing: -0.3px;
+    }
+    .header-text span {
+      color: rgba(255,255,255,0.55); font-size: 11px;
+    }
+
+    /* ── Tabs ── */
+    .tab-bar {
+      display: flex;
+      background: var(--kg-white);
+      border-bottom: 1px solid var(--kg-border);
+      position: sticky;
+      top: 60px;
+      z-index: 99;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--kg-text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition);
+    }
+    .tab-btn:hover { color: var(--kg-blue); background: rgba(59,130,246,0.04); }
+    .tab-btn.active {
+      color: var(--kg-blue);
+      border-bottom-color: var(--kg-blue);
+    }
+
+    /* ── Tab Content ── */
+    .tab-content { display: none; padding: 12px; }
+    .tab-content.active { display: block; }
+
+    /* ── Quick Reply Cards ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--kg-text-muted);
+      margin-bottom: 8px;
+      padding-left: 2px;
+    }
+
+    .reply-card {
+      background: var(--kg-white);
+      border: 1px solid var(--kg-border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all var(--transition);
+      cursor: default;
+    }
+    .reply-card:hover {
+      border-color: var(--kg-blue);
+      box-shadow: var(--shadow-sm);
+    }
+    .reply-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .reply-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+    }
+    .badge-green { background: var(--kg-green); }
+    .badge-red { background: var(--kg-red); }
+    .badge-blue { background: var(--kg-blue); }
+    .badge-purple { background: var(--kg-purple); }
+    .badge-orange { background: var(--kg-orange); }
+    .badge-teal { background: var(--kg-teal); }
+
+    .reply-preview {
+      font-size: 12px;
+      color: var(--kg-text-muted);
+      margin-bottom: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      background: var(--kg-surface);
+      padding: 8px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      max-height: 80px;
+      overflow: hidden;
+    }
+
+    .reply-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-send {
+      background: var(--kg-green);
+      color: white;
+    }
+    .btn-send:hover { background: var(--kg-green-hover); }
+
+    .btn-preview {
+      background: var(--kg-blue);
+      color: white;
+    }
+    .btn-preview:hover { background: var(--kg-blue-hover); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--kg-text-muted);
+      border: 1px solid var(--kg-border);
+    }
+    .btn-outline:hover { background: var(--kg-surface); color: var(--kg-text); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--kg-red);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.08); }
+
+    .btn-primary {
+      background: var(--kg-blue);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--kg-blue-hover); }
+
+    .btn-add {
+      background: var(--kg-green);
+      color: white;
+      width: 100%;
+      padding: 10px;
+      font-size: 12px;
+    }
+    .btn-add:hover { background: var(--kg-green-hover); }
+
+    .btn-sm { padding: 5px 10px; font-size: 10px; }
+
+    /* ── Custom Template Form ── */
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--kg-text);
+      margin-bottom: 4px;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--kg-border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--kg-text);
+      background: var(--kg-white);
+      transition: border-color var(--transition);
+    }
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--kg-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .form-textarea {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* ── Postings Tab ── */
+    .posting-item {
+      background: var(--kg-white);
+      border: 1px solid var(--kg-border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+    .posting-item:hover {
+      border-color: var(--kg-blue);
+    }
+    .posting-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      cursor: pointer;
+      gap: 8px;
+    }
+    .posting-item-header:hover {
+      background: rgba(59,130,246,0.03);
+    }
+    .posting-ref {
+      background: var(--kg-navy);
+      color: white;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .posting-summary {
+      flex: 1;
+      font-size: 11px;
+      color: var(--kg-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .posting-actions-mini {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .posting-actions-mini .btn {
+      padding: 3px 6px;
+      font-size: 10px;
+    }
+    .posting-expand {
+      display: none;
+      padding: 0 12px 10px;
+    }
+    .posting-expand.show { display: block; }
+    .posting-expand pre {
+      background: var(--kg-surface);
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .add-posting-area {
+      background: var(--kg-white);
+      border: 2px dashed var(--kg-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Toast Notification ── */
+    .toast-container {
+      position: fixed;
+      bottom: 16px;
+      left: 12px;
+      right: 12px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn 250ms ease, toastOut 250ms ease 2.5s forwards;
+      pointer-events: auto;
+      box-shadow: var(--shadow-md);
+    }
+    .toast-success { background: var(--kg-green); }
+    .toast-error { background: var(--kg-red); }
+    .toast-info { background: var(--kg-blue); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: translateY(-8px); }
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--kg-white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--kg-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 14px; }
+    .modal-body { padding: 16px; }
+    .modal-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--kg-border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .modal-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; color: var(--kg-text-muted);
+      padding: 4px;
+    }
+    .modal-close:hover { color: var(--kg-text); }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--kg-text-muted);
+    }
+    .empty-state-icon { font-size: 32px; margin-bottom: 8px; }
+    .empty-state p { font-size: 12px; }
+
+    /* ── Utility ── */
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mb-8 { margin-bottom: 8px; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .divider { height: 1px; background: var(--kg-border); margin: 14px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">KG</div>
+    <div class="header-text">
+      <h1>Quick Reply & Postings</h1>
+      <span>Kingsgate Logistics</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="replies" onclick="switchTab('replies')">⚡ Quick Replies</button>
+    <button class="tab-btn" data-tab="postings" onclick="switchTab('postings')">📦 Postings</button>
+    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!--         TAB: QUICK REPLIES          -->
+  <!-- ════════════════════════════════════ -->
+  <div id="tab-replies" class="tab-content active">
+
+    <div class="section-label">Built-in Templates</div>
+
+    <!-- Covered -->
+    <div class="reply-card">
+      <div class="reply-card-header">
+        <span class="reply-badge badge-green">✅ Covered</span>
+      </div>
+      <div class="reply-preview">I am really sorry, this load is now covered. Thank you for reaching out about it.</div>
+      <div class="reply-actions">
+        <button class="btn btn-send btn-sm" onclick="sendReply('covered')">⚡ Send Now</button>
+        <button class="btn btn-preview btn-sm" onclick="previewReply('covered')">👁 Preview Draft</button>
+      </div>
+    </div>
+
+    <!-- DNU -->
+    <div class="reply-card">
+      <div class="reply-card-header">
+        <span class="reply-badge badge-red">🚫 DNU</span>
+      </div>
+      <div class="reply-preview">I am really sorry we cannot use your company. If you need more details please reach out to carriers@kingsgatelogistics.com</div>
+      <div class="reply-actions">
+        <button class="btn btn-send btn-sm" onclick="sendReply('dnu')">⚡ Send Now</button>
+        <button class="btn btn-preview btn-sm" onclick="previewReply('dnu')">👁 Preview Draft</button>
+      </div>
+    </div>
+
+    <!-- Highway -->
+    <div class="reply-card">
+      <div class="reply-card-header">
+        <span class="reply-badge badge-blue">🛣️ Highway</span>
+      </div>
+      <div class="reply-preview">We need to quickly connect via Highway.com, I sent a link to your email. Please let me know if you don't see it soon.</div>
+      <div class="reply-actions">
+        <button class="btn btn-send btn-sm" onclick="sendReply('highway')">⚡ Send Now</button>
+        <button class="btn btn-preview btn-sm" onclick="previewReply('highway')">👁 Preview Draft</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Custom Templates -->
+    <div class="flex-between mb-8">
+      <div class="section-label" style="margin-bottom:0">Custom Templates</div>
+      <button class="btn btn-outline btn-sm" onclick="showAddTemplateModal()">+ Add</button>
+    </div>
+
+    <div id="custom-templates-container">
+      <!-- Populated by JS -->
+    </div>
+
+    <div id="no-custom-templates" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">📝</div>
+      <p>No custom templates yet.<br/>Click "+ Add" to create one.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!--          TAB: POSTINGS              -->
+  <!-- ════════════════════════════════════ -->
+  <div id="tab-postings" class="tab-content">
+
+    <div class="flex-between mb-8">
+      <div class="section-label" style="margin-bottom:0">Load Postings</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="clearAllPostings()">🗑 Clear All</button>
+      </div>
+    </div>
+
+    <!-- Add Posting Area -->
+    <div class="add-posting-area">
+      <div class="form-group">
+        <label>Paste Load Posting Text</label>
+        <textarea id="new-posting-text" class="form-textarea" rows="4" placeholder="Paste raw posting from clipboard..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Pay Rate (optional)</label>
+        <input type="text" id="new-posting-pay" class="form-input" placeholder="e.g. $2,500 or $2,200-$2,500"/>
+      </div>
+      <button class="btn btn-add" onclick="addPosting()">➕ Add & Clean Posting</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div id="postings-container">
+      <!-- Populated by JS -->
+    </div>
+
+    <div id="no-postings" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">📦</div>
+      <p>No postings saved.<br/>Paste one above to get started.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!--          TAB: SETTINGS              -->
+  <!-- ════════════════════════════════════ -->
+  <div id="tab-settings" class="tab-content">
+    <div class="section-label">Preferences</div>
+
+    <div class="reply-card">
+      <div class="form-group">
+        <label>Default Reply Type</label>
+        <select id="setting-reply-type" class="form-input" onchange="saveSetting('replyType', this.value)">
+          <option value="replyAll">Reply All</option>
+          <option value="reply">Reply (sender only)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="reply-card mt-8">
+      <div class="form-group">
+        <label>Email Signature (appended to replies)</label>
+        <textarea id="setting-signature" class="form-textarea" rows="4" placeholder="Leave blank to use your Outlook signature..." onchange="saveSetting('signature', this.value)"></textarea>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Data Management</div>
+
+    <div class="reply-card">
+      <p style="font-size:12px; color:var(--kg-text-muted); margin-bottom:10px;">
+        Templates and postings are stored in your browser's local storage. Use these buttons to export or import your data.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" onclick="exportData()">📤 Export</button>
+        <button class="btn btn-outline" onclick="importData()">📥 Import</button>
+        <button class="btn btn-danger" onclick="resetAll()">⚠️ Reset All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!--         MODAL: Add/Edit Template    -->
+  <!-- ════════════════════════════════════ -->
+  <div id="template-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Custom Template</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Template Name</label>
+          <input type="text" id="modal-template-name" class="form-input" placeholder="e.g. Rate Confirmation"/>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <select id="modal-template-color" class="form-input">
+            <option value="purple">Purple</option>
+            <option value="orange">Orange</option>
+            <option value="teal">Teal</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="red">Red</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Reply Text</label>
+          <textarea id="modal-template-body" class="form-textarea" rows="5" placeholder="Type your reply template..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-save-btn" onclick="saveTemplate()">Save Template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!--     MODAL: Edit Posting             -->
+  <!-- ════════════════════════════════════ -->
+  <div id="posting-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="posting-modal-title">Edit Posting</h3>
+        <button class="modal-close" onclick="closePostingModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Posting Content</label>
+          <textarea id="posting-modal-body" class="form-textarea" rows="8"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePostingModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="savePostingEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)"/>
+
+  <script>
+    /* ═══════════════════════════════════════
+       DATA LAYER
+       ═══════════════════════════════════════ */
+
+    const STORAGE_KEYS = {
+      templates: 'kg_custom_templates',
+      postings: 'kg_postings',
+      settings: 'kg_settings'
+    };
+
+    // Built-in templates
+    const BUILTIN_TEMPLATES = {
+      covered: {
+        name: 'Covered',
+        body: 'I am really sorry, this load is now covered. Thank you for reaching out about it.',
+        color: 'green'
+      },
+      dnu: {
+        name: 'DNU',
+        body: 'I am really sorry we cannot use your company. If you need more details please reach out to carriers@kingsgatelogistics.com',
+        color: 'red'
+      },
+      highway: {
+        name: 'Highway',
+        body: 'We need to quickly connect via Highway.com, I sent a link to your email. Please let me know if you don\'t see it soon.',
+        color: 'blue'
+      }
+    };
+
+    function loadData(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        console.error('Load error:', e);
+        return null;
+      }
+    }
+
+    function saveData(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (e) {
+        console.error('Save error:', e);
+      }
+    }
+
+    function getCustomTemplates() {
+      return loadData(STORAGE_KEYS.templates) || [];
+    }
+
+    function getPostings() {
+      return loadData(STORAGE_KEYS.postings) || {};
+    }
+
+    function getSettings() {
+      return loadData(STORAGE_KEYS.settings) || { replyType: 'replyAll', signature: '' };
+    }
+
+    /* ═══════════════════════════════════════
+       OFFICE.JS INITIALIZATION
+       ═══════════════════════════════════════ */
+
+    let officeReady = false;
+    let currentMailItem = null;
+
+    Office.onReady(function(info) {
+      officeReady = true;
+      if (info.host === Office.HostType.Outlook) {
+        currentMailItem = Office.context.mailbox.item;
+      }
+      // Load saved settings into UI
+      initSettings();
+      renderCustomTemplates();
+      renderPostings();
+    });
+
+    // Fallback if Office.js isn't available (dev/testing mode)
+    setTimeout(() => {
+      if (!officeReady) {
+        console.log('Running in development mode (no Office.js)');
+        officeReady = true;
+        initSettings();
+        renderCustomTemplates();
+        renderPostings();
+      }
+    }, 2000);
+
+    /* ═══════════════════════════════════════
+       TAB SWITCHING
+       ═══════════════════════════════════════ */
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-content').forEach(tc => {
+        tc.classList.toggle('active', tc.id === `tab-${tabId}`);
+      });
+    }
+
+    /* ═══════════════════════════════════════
+       REPLY LOGIC (Office.js)
+       ═══════════════════════════════════════ */
+
+    function getTemplateBody(templateKey) {
+      if (BUILTIN_TEMPLATES[templateKey]) {
+        return BUILTIN_TEMPLATES[templateKey].body;
+      }
+      // Check custom templates
+      const customs = getCustomTemplates();
+      const tpl = customs.find(t => t.id === templateKey);
+      return tpl ? tpl.body : '';
+    }
+
+    function buildReplyHtml(body) {
+      const settings = getSettings();
+      let html = body.replace(/\n/g, '<br/>');
+      if (settings.signature && settings.signature.trim()) {
+        html += '<br/><br/>' + settings.signature.replace(/\n/g, '<br/>');
+      }
+      return html;
+    }
+
+    function sendReply(templateKey) {
+      const body = getTemplateBody(templateKey);
+      if (!body) {
+        showToast('Template not found', 'error');
+        return;
+      }
+
+      if (!currentMailItem) {
+        // Dev mode fallback - just copy to clipboard
+        copyToClipboard(body);
+        showToast('Copied to clipboard (Outlook not connected)', 'info');
+        return;
+      }
+
+      const settings = getSettings();
+      const htmlBody = buildReplyHtml(body);
+      const replyMethod = settings.replyType === 'reply' ? 'reply' : 'replyAll';
+
+      // Use displayReplyAllForm or displayReplyForm with auto-body
+      try {
+        if (typeof currentMailItem.body !== 'undefined' && typeof Office.context.mailbox.item.body.setAsync === 'function') {
+          // Modern API: compose reply
+          const responseType = replyMethod === 'replyAll'
+            ? Office.MailboxEnums.ResponseType.ReplyAll
+            : Office.MailboxEnums.ResponseType.Reply;
+
+          Office.context.mailbox.item.displayReplyAllForm({
+            htmlBody: htmlBody
+          });
+
+          // Attempt to send programmatically after short delay
+          // Note: Auto-send requires additional permissions in production
+          showToast('Reply created - review and send!', 'info');
+        }
+      } catch (e) {
+        // Fallback: use displayReplyAllForm
+        try {
+          if (replyMethod === 'replyAll') {
+            currentMailItem.displayReplyAllForm(htmlBody);
+          } else {
+            currentMailItem.displayReplyForm(htmlBody);
+          }
+          showToast('Reply draft opened!', 'success');
+        } catch (e2) {
+          copyToClipboard(body);
+          showToast('Copied to clipboard (reply form unavailable)', 'info');
+        }
+      }
+    }
+
+    function previewReply(templateKey) {
+      const body = getTemplateBody(templateKey);
+      if (!body) {
+        showToast('Template not found', 'error');
+        return;
+      }
+
+      if (!currentMailItem) {
+        copyToClipboard(body);
+        showToast('Copied to clipboard (Outlook not connected)', 'info');
+        return;
+      }
+
+      const settings = getSettings();
+      const htmlBody = buildReplyHtml(body);
+
+      try {
+        if (settings.replyType === 'reply') {
+          currentMailItem.displayReplyForm(htmlBody);
+        } else {
+          currentMailItem.displayReplyAllForm(htmlBody);
+        }
+        showToast('Reply draft opened for review', 'success');
+      } catch (e) {
+        copyToClipboard(body);
+        showToast('Copied to clipboard (fallback)', 'info');
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       CUSTOM TEMPLATES
+       ═══════════════════════════════════════ */
+
+    let editingTemplateId = null;
+
+    function renderCustomTemplates() {
+      const container = document.getElementById('custom-templates-container');
+      const emptyState = document.getElementById('no-custom-templates');
+      const templates = getCustomTemplates();
+
+      container.innerHTML = '';
+
+      if (templates.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      templates.forEach(tpl => {
+        const card = document.createElement('div');
+        card.className = 'reply-card';
+        card.innerHTML = `
+          <div class="reply-card-header">
+            <span class="reply-badge badge-${tpl.color}">${tpl.name}</span>
+            <div style="display:flex; gap:4px; margin-left:auto;">
+              <button class="btn btn-outline btn-sm" onclick="editTemplate('${tpl.id}')">✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${tpl.id}')">🗑</button>
+            </div>
+          </div>
+          <div class="reply-preview">${escapeHtml(tpl.body)}</div>
+          <div class="reply-actions">
+            <button class="btn btn-send btn-sm" onclick="sendReply('${tpl.id}')">⚡ Send Now</button>
+            <button class="btn btn-preview btn-sm" onclick="previewReply('${tpl.id}')">👁 Preview Draft</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function showAddTemplateModal() {
+      editingTemplateId = null;
+      document.getElementById('modal-title').textContent = 'Add Custom Template';
+      document.getElementById('modal-template-name').value = '';
+      document.getElementById('modal-template-body').value = '';
+      document.getElementById('modal-template-color').value = 'purple';
+      document.getElementById('modal-save-btn').textContent = 'Save Template';
+      document.getElementById('template-modal').classList.add('show');
+    }
+
+    function editTemplate(id) {
+      const templates = getCustomTemplates();
+      const tpl = templates.find(t => t.id === id);
+      if (!tpl) return;
+
+      editingTemplateId = id;
+      document.getElementById('modal-title').textContent = 'Edit Template';
+      document.getElementById('modal-template-name').value = tpl.name;
+      document.getElementById('modal-template-body').value = tpl.body;
+      document.getElementById('modal-template-color').value = tpl.color;
+      document.getElementById('modal-save-btn').textContent = 'Update Template';
+      document.getElementById('template-modal').classList.add('show');
+    }
+
+    function saveTemplate() {
+      const name = document.getElementById('modal-template-name').value.trim();
+      const body = document.getElementById('modal-template-body').value.trim();
+      const color = document.getElementById('modal-template-color').value;
+
+      if (!name || !body) {
+        showToast('Name and reply text are required', 'error');
+        return;
+      }
+
+      const templates = getCustomTemplates();
+
+      if (editingTemplateId) {
+        const idx = templates.findIndex(t => t.id === editingTemplateId);
+        if (idx >= 0) {
+          templates[idx] = { ...templates[idx], name, body, color };
+        }
+      } else {
+        templates.push({
+          id: 'custom_' + Date.now(),
+          name,
+          body,
+          color
+        });
+      }
+
+      saveData(STORAGE_KEYS.templates, templates);
+      renderCustomTemplates();
+      closeModal();
+      showToast(editingTemplateId ? 'Template updated' : 'Template added', 'success');
+    }
+
+    function deleteTemplate(id) {
+      if (!confirm('Delete this template?')) return;
+      let templates = getCustomTemplates();
+      templates = templates.filter(t => t.id !== id);
+      saveData(STORAGE_KEYS.templates, templates);
+      renderCustomTemplates();
+      showToast('Template deleted', 'success');
+    }
+
+    function closeModal() {
+      document.getElementById('template-modal').classList.remove('show');
+      editingTemplateId = null;
+    }
+
+    /* ═══════════════════════════════════════
+       POSTINGS MANAGER
+       ═══════════════════════════════════════ */
+
+    let editingPostingKey = null;
+
+    function cleanPosting(raw, payRate) {
+      let posting = raw;
+
+      // Normalize PU/DEL labels
+      for (let i = 1; i < 20; i++) {
+        posting = posting.replace(new RegExp(i + ' PU', 'g'), 'PU');
+        posting = posting.replace(new RegExp(i + ' DP', 'g'), 'DEL');
+      }
+
+      let lines = posting.split('\n');
+
+      // Remove consecutive duplicates
+      const deduped = [lines[0]];
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i] !== lines[i - 1]) {
+          deduped.push(lines[i]);
+        }
+      }
+      lines = deduped;
+
+      // Count PU and DEL
+      let numPu = 0, numDel = 0;
+      lines.forEach(line => {
+        if (line.includes('PU')) numPu++;
+        if (line.includes('DEL')) numDel++;
+      });
+
+      lines[0] = numPu + ' Pick ' + numDel + ' Stop';
+
+      if (payRate && payRate.trim()) {
+        lines[lines.length - 1] = 'Pays ' + payRate.trim();
+      }
+
+      return lines.join('\n');
+    }
+
+    function getNextPostingKey(postings) {
+      const keys = Object.keys(postings).map(Number).filter(n => !isNaN(n));
+      return keys.length > 0 ? (Math.max(...keys) + 1).toString() : '1';
+    }
+
+    function addPosting() {
+      const raw = document.getElementById('new-posting-text').value.trim();
+      const pay = document.getElementById('new-posting-pay').value.trim();
+
+      if (!raw) {
+        showToast('Please paste a posting first', 'error');
+        return;
+      }
+
+      const postings = getPostings();
+      const key = getNextPostingKey(postings);
+      const cleaned = cleanPosting(raw, pay);
+
+      postings[key] = cleaned;
+      saveData(STORAGE_KEYS.postings, postings);
+
+      // Clear inputs
+      document.getElementById('new-posting-text').value = '';
+      document.getElementById('new-posting-pay').value = '';
+
+      renderPostings();
+      showToast(`Posting [${key}] added`, 'success');
+
+      // Also copy cleaned version
+      copyToClipboard(cleaned);
+    }
+
+    function renderPostings() {
+      const container = document.getElementById('postings-container');
+      const emptyState = document.getElementById('no-postings');
+      const postings = getPostings();
+      const keys = Object.keys(postings).sort((a, b) => Number(a) - Number(b));
+
+      container.innerHTML = '';
+
+      if (keys.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      keys.forEach(key => {
+        const value = postings[key];
+        const summary = extractPostingSummary(value);
+
+        const item = document.createElement('div');
+        item.className = 'posting-item';
+        item.innerHTML = `
+          <div class="posting-item-header" onclick="togglePosting(this)">
+            <span class="posting-ref">#${key}</span>
+            <span class="posting-summary">${escapeHtml(summary)}</span>
+            <div class="posting-actions-mini">
+              <button class="btn btn-send btn-sm" onclick="event.stopPropagation(); replyWithPosting('${key}')" title="Reply All with posting">⚡</button>
+              <button class="btn btn-preview btn-sm" onclick="event.stopPropagation(); copyPostingToClipboard('${key}')" title="Copy to clipboard">📋</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); editPosting('${key}')" title="Edit">✏️</button>
+              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deletePosting('${key}')" title="Delete">🗑</button>
+            </div>
+          </div>
+          <div class="posting-expand">
+            <pre>${escapeHtml(value)}</pre>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function extractPostingSummary(value) {
+      let pu = '', del_ = '', pay = '';
+      const lines = value.split('\n');
+
+      for (const line of lines) {
+        if (line.includes('PU') && !pu) {
+          const parts = line.split('PU');
+          pu = parts.length > 1 ? 'PU' + parts[1].split(',')[0].trim() : '';
+        }
+        if (line.includes('DEL') && !del_) {
+          const parts = line.split('DEL');
+          del_ = parts.length > 1 ? 'DEL' + parts[1].split(',')[0].trim() : '';
+        }
+        if (line.includes('Pays')) {
+          pay = line.trim();
+        }
+      }
+
+      return `${pu} → ${del_} | ${pay}`.trim();
+    }
+
+    function togglePosting(header) {
+      const expand = header.nextElementSibling;
+      expand.classList.toggle('show');
+    }
+
+    function copyPostingToClipboard(key) {
+      const postings = getPostings();
+      if (postings[key]) {
+        copyToClipboard(postings[key]);
+        showToast(`Posting [${key}] copied to clipboard`, 'success');
+      }
+    }
+
+    function replyWithPosting(key) {
+      const postings = getPostings();
+      if (!postings[key]) return;
+
+      if (!currentMailItem) {
+        copyToClipboard(postings[key]);
+        showToast('Copied to clipboard (Outlook not connected)', 'info');
+        return;
+      }
+
+      const settings = getSettings();
+      const htmlBody = postings[key].replace(/\n/g, '<br/>');
+
+      try {
+        if (settings.replyType === 'reply') {
+          currentMailItem.displayReplyForm(htmlBody);
+        } else {
+          currentMailItem.displayReplyAllForm(htmlBody);
+        }
+        showToast(`Reply draft opened with posting [${key}]`, 'success');
+      } catch (e) {
+        copyToClipboard(postings[key]);
+        showToast('Copied to clipboard (fallback)', 'info');
+      }
+    }
+
+    function editPosting(key) {
+      const postings = getPostings();
+      if (!postings[key]) return;
+
+      editingPostingKey = key;
+      document.getElementById('posting-modal-title').textContent = `Edit Posting [${key}]`;
+      document.getElementById('posting-modal-body').value = postings[key];
+      document.getElementById('posting-modal').classList.add('show');
+    }
+
+    function savePostingEdit() {
+      if (!editingPostingKey) return;
+      const newContent = document.getElementById('posting-modal-body').value.trim();
+      if (!newContent) {
+        showToast('Posting content cannot be empty', 'error');
+        return;
+      }
+
+      const postings = getPostings();
+      postings[editingPostingKey] = newContent;
+      saveData(STORAGE_KEYS.postings, postings);
+      renderPostings();
+      closePostingModal();
+      showToast(`Posting [${editingPostingKey}] updated`, 'success');
+    }
+
+    function deletePosting(key) {
+      if (!confirm(`Delete posting [${key}]?`)) return;
+      const postings = getPostings();
+      delete postings[key];
+      saveData(STORAGE_KEYS.postings, postings);
+      renderPostings();
+      showToast(`Posting [${key}] deleted`, 'success');
+    }
+
+    function closePostingModal() {
+      document.getElementById('posting-modal').classList.remove('show');
+      editingPostingKey = null;
+    }
+
+    function clearAllPostings() {
+      const postings = getPostings();
+      if (Object.keys(postings).length === 0) {
+        showToast('No postings to clear', 'info');
+        return;
+      }
+      if (!confirm(`Delete all ${Object.keys(postings).length} postings?`)) return;
+      saveData(STORAGE_KEYS.postings, {});
+      renderPostings();
+      showToast('All postings cleared', 'success');
+    }
+
+    /* ═══════════════════════════════════════
+       SETTINGS
+       ═══════════════════════════════════════ */
+
+    function initSettings() {
+      const settings = getSettings();
+      document.getElementById('setting-reply-type').value = settings.replyType || 'replyAll';
+      document.getElementById('setting-signature').value = settings.signature || '';
+    }
+
+    function saveSetting(key, value) {
+      const settings = getSettings();
+      settings[key] = value;
+      saveData(STORAGE_KEYS.settings, settings);
+      showToast('Setting saved', 'success');
+    }
+
+    /* ═══════════════════════════════════════
+       DATA EXPORT / IMPORT
+       ═══════════════════════════════════════ */
+
+    function exportData() {
+      const data = {
+        templates: getCustomTemplates(),
+        postings: getPostings(),
+        settings: getSettings(),
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kg-addin-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Data exported', 'success');
+    }
+
+    function importData() {
+      document.getElementById('import-file').click();
+    }
+
+    function handleImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.templates) saveData(STORAGE_KEYS.templates, data.templates);
+          if (data.postings) saveData(STORAGE_KEYS.postings, data.postings);
+          if (data.settings) saveData(STORAGE_KEYS.settings, data.settings);
+          initSettings();
+          renderCustomTemplates();
+          renderPostings();
+          showToast('Data imported successfully', 'success');
+        } catch (err) {
+          showToast('Invalid import file', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function resetAll() {
+      if (!confirm('This will delete ALL templates, postings, and settings. Are you sure?')) return;
+      localStorage.removeItem(STORAGE_KEYS.templates);
+      localStorage.removeItem(STORAGE_KEYS.postings);
+      localStorage.removeItem(STORAGE_KEYS.settings);
+      initSettings();
+      renderCustomTemplates();
+      renderPostings();
+      showToast('All data reset', 'success');
+    }
+
+    /* ═══════════════════════════════════════
+       UTILITIES
+       ═══════════════════════════════════════ */
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type) {
+      const container = document.getElementById('toast-container');
+      const icons = { success: '✓', error: '✗', info: 'ℹ' };
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type || 'info'}`;
+      toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${escapeHtml(message)}`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
