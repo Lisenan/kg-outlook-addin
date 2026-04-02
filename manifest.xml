@@ -97,11 +97,14 @@
         <bt:Url id="residTaskpaneUrl" DefaultValue="https://lisenan.github.io/kg-outlook-addin/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="residGroupLabel" DefaultValue="KG Tools"/>
+        <bt:String id="residGroupLabel" DefaultValue="Kingsgate"/>
         <bt:String id="residTaskpaneButtonLabel" DefaultValue="KG Quick Reply"/>
-        <bt:String id="residTaskpaneButtonDesc" DefaultValue="Open quick reply templates and load postings manager"/>
       </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="residTaskpaneButtonDesc" DefaultValue="Open quick reply templates and postings manager for Kingsgate Logistics."/>
+      </bt:LongStrings>
     </Resources>
 
   </VersionOverrides>
+
 </OfficeApp>
